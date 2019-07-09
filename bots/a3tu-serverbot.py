@@ -81,28 +81,6 @@ def get_command(script_commands_json, cmd):
     with open(script_commands_json, 'r') as f:
         script_commands = json.load(f)
     return script_commands[cmd]
-    #if cmd == 'updateserver':
-    #    return "/home/steam/arma3/a3update"
-    #elif cmd == 'startserver':
-    #    return "sudo /bin/systemctl start a3tu-server"
-    #elif cmd == 'stopserver':
-    #    return "sudo /bin/systemctl stop a3tu-server"
-    #elif cmd == 'startclient':
-    #    return "sudo /bin/systemctl start a3tu-client"
-    #elif cmd == 'statusclient':
-    #    return "sudo systemctl status a3tu-client | head -3 && sudo systemctl status a3tu-client | tail -5"
-    #elif cmd == 'stopclient':
-    #    return "sudo /bin/systemctl stop a3tu-client"
-    #elif cmd == 'updatebase':
-    #    return "/usr/bin/rsync --exclude=.a3s --exclude=.htaccess --exclude=*.zsync --exclude=@disbi --delete --stats -Phrae \'ssh\' http@repo.a3tu.com:/var/www/html/tempunitbaserepo /home/steam/arma3/a3tu/mods/ | tail -16"
-    #elif cmd == 'updatezombie':
-    #    return "/usr/bin/rsync --exclude=.a3s --exclude=.htaccess --exclude=*.zsync --exclude=@disbi --delete --stats -Phrae \'ssh\' http@repo.a3tu.com:/var/www/html/tempunitzombierepo /home/steam/arma3/a3tu/mods/ | tail -16"
-    #elif cmd == 'updatenam':
-    #    return "/usr/bin/rsync --exclude=.a3s --exclude=.htaccess --exclude=*.zsync --exclude=@disbi --delete --stats -Phrae \'ssh\' http@repo.a3tu.com:/var/www/html/tempunitvietnamrepo /home/steam/arma3/a3tu/mods/ | tail -16"
-    #elif return "cd /home/steam/arma3/a3tu/mpmissions ; wget -O " + bn + " -c " + message.attachments[0]['url']cmd == 'updateww2':
-    #    return "/usr/bin/rsync --exclude=.a3s --exclude=.htaccess --exclude=*.zsync --exclude=@disbi --delete --stats -Phrae \'ssh\' http@repo.a3tu.com:/var/www/html/tempunitww2repo /home/steam/arma3/a3tu/mods/ | tail -16"
-    #else:
-    #    return "error"
 
 
 async def run(cmd):
