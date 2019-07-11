@@ -1,0 +1,14 @@
+A3TU ArmA 3 bots in use to manage the Linux server and headless client.
+
+I've omited the bots/a3tu-serverbot_vars.json and bots/a3tu-clientbot_vars.json files because they contain confidential information.
+
+Sample format for those missing files:
+bots/a3tu-serverbot_vars.json:
+{
+    "api_token": "BOTDISCORDAPITOKENGOESHERE",
+    "authorized_ids": [
+        "123456789012345678",
+        "012345678901234567",
+        "901234567890123456"
+    ]
+}
