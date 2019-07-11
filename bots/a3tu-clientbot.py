@@ -171,14 +171,14 @@ async def on_ready():
     print('------')
 
 
-script_vars_json = (__file__).split('.')[0] + "_vars"
-script_commands_json = (__file__).split('.')[0] + "_commands"
+script_vars_json = (__file__).split('.')[0] + "_vars.json"
+script_commands_json = (__file__).split('.')[0] + "_commands.json"
 
 with open(script_vars_json,'r') as f:
     script_vars = json.load(f)
 
 api_token = script_vars['api_token']
 authorized_ids = script_vars['authorized_ids']
-mod_packs = script_vars['mod_packs']
+#mod_packs = script_vars['mod_packs']
 
 client.run(api_token, bot=True)
