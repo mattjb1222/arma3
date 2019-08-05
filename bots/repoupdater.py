@@ -7,6 +7,7 @@ import os
 import re
 import json
 import subprocess
+import shutil
 from collections import OrderedDict
 
 def read_json(json_file):
@@ -31,7 +32,6 @@ def rebuild(a3sync_path, java_path, repo):
     return child.returncode
 
 def create_steam_batch(steam_user, scripts_path, steam_apps_path, mod):
-    #print("Creating steam batch script...")
     with open(scripts_path + '/steam_script.' + str(os.getpid()), 'w') as f:
         f.write("@ShutdownOnFailedCommand 0\n")
         f.write("@NoPromptForPassword 1\n")
@@ -56,10 +56,7 @@ def rsync_files(steam_apps_path, id, path):
 
 def delete_download_dir(steam_apps_path, id):
     if os.path.exists(steam_apps_path + "/steamapps/workshop/content/107410/" + id + "/"):
-        args = ['rm', '-rf', steam_apps_path + "/steamapps/workshop/content/107410/" + id + "/"]
-        child = subprocess.Popen(args, stdout=subprocess.PIPE)
-        stream = child.communicate()[0]
-        return child.returncode
+        shutil.rmtree(steam_apps_path + "/steamapps/workshop/content/107410/" + id + "/")
     else:
         return
 
@@ -107,6 +104,8 @@ for repo in repos:
                     repos[repo][id]['update'] = True
             except:
                 repos[repo][id]['modified'] = m[1]
+
+write_json(repos, repos_json)
 
 #
 # Create steam script and download workshop mod
