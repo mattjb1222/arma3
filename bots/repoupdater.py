@@ -26,7 +26,6 @@ def rebuild(a3sync_path, java_path, repo):
     args = [java_path, '-jar', 'ArmA3Sync.jar', '-BUILD', repo]
     child = subprocess.Popen(args, stdout=subprocess.PIPE)
     stream = child.communicate()[0]
-    #print(stream)
     with open('/var/www/html/' + repo.lower() + '/.a3s/.htaccess','w') as f:
         f.write("Satisfy Any")
     return child.returncode
@@ -115,13 +114,11 @@ for repo in repos:
         if not repos[repo][id]['enabled']:
             continue
         if repos[repo][id]['update']: 
-            #print("Creating steam batch for %s" % id)
             steam_batch = create_steam_batch(steam_user, scripts_path, steam_apps_path, id)
 
             attempt = 0
             while attempt < 10:
                 return_code = download_mod(steam_cmd_bin, steam_batch)
-                #print("RC: %s" % return_code)
                 if return_code == 0:
                     repos[repo][id]['update'] = False
                     repos[repo][id]['rsync'] = True
