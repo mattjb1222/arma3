@@ -118,7 +118,7 @@ async def on_message(message):
 
     # bot was mentioned in the message with commands or help specified
     if client.user.mentioned_in(message) and ('commands' in message.content.lower() or 'help' in message.content.lower()):
-        msg = 'Valid commands are:```\ncommands\nhelp\nstartclient\nstopclient\nstatusclient\nstartserver\nstopserver\nupdateserver\nupdatebase\nupdateww2\nupdatenam\nupdatezombie\nmods: tempunitbaserepo,tempunitzombierepo,tempunitww2repo,tempunitvietnamrepo```'
+        msg = 'Valid commands are:```\ncommands\nhelp\nstartclient\nstopclient\nstatusclient\nstartserver\nstopserver\nstatusserver\nupdateserver\nupdatebase\nupdateww2\nupdatenam\nupdatezombie\nmods: tempunitbaserepo,tempunitzombierepo,tempunitww2repo,tempunitvietnamrepo```'
         await channel.send(msg)
 
     # bot was mentioned in the message with the addmission directive
