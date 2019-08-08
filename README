@@ -1,14 +1,42 @@
 A3TU ArmA 3 bots in use to manage the Linux server and headless client.
 
-I've omited the bots/a3tu-serverbot_vars.json and bots/a3tu-clientbot_vars.json files because they contain confidential information.
+I've omited the following files because they contain confidential information:
+bots/a3tu-serverbot_vars.json
+bots/a3tu-clientbot_vars.json
+bots/repoupdater_vars.json
 
 Sample format for those missing files:
 bots/a3tu-serverbot_vars.json:
 {
-    "api_token": "BOTDISCORDAPITOKENGOESHERE",
+    "api_token": "SERVERBOTDISCORDAPITOKENGOESHERE",
     "authorized_ids": [
         "123456789012345678",
         "012345678901234567",
         "901234567890123456"
     ]
 }
+
+bots/a3tu-clientbot_vars.json:
+{
+    "api_token": "CLIENTBOTDISCORDAPITOKENGOESHERE",
+    "authorized_ids": [
+        "123456789012345678",
+        "012345678901234567",
+        "901234567890123456"
+    ]
+}
+
+bots/repoupdater_vars.json:
+{
+    "toEmail": "your_email@domain.com",
+    "fromEmail": "your_email@domain.com",
+    "scripts_path": "/home/steam/scripts",
+    "a3sync_path": "/home/steam/ArmA3Sync-1-6-92",
+    "java_path": "/usr/bin/java",
+    "steam_apps_path": "/home/steam/Steam",
+    "steam_cmd_bin": "/home/steam/steamcmd.sh",
+    "steam_user": "steam_username_who_owns_arma3",
+    "emailmsg": 1,
+    "discordmsg": 1
+}
+
