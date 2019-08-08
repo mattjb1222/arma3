@@ -1,4 +1,4 @@
 #!/bin/bash
 
-steamcmd +runscript /home/steam/arma3/a3update.txt
+/usr/games/steamcmd +runscript /home/steam/arma3/a3update.txt
 
