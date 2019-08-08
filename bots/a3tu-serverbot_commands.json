@@ -1,5 +1,5 @@
 {
-    "updateserver": "/home/steam/arma3/a3update",
+    "updateserver": "/bin/bash /home/steam/arma3/a3update",
     "startserver": "sudo /bin/systemctl start a3tu-server",
     "stopserver": "sudo /bin/systemctl stop a3tu-server",
     "startclient": "sudo /bin/systemctl start a3tu-client",
