@@ -6,6 +6,7 @@ import argparse
 import os
 import re
 import json
+import sys
 import subprocess
 import shutil
 from collections import OrderedDict
@@ -76,6 +77,123 @@ with open(os.path.dirname(os.path.abspath(__file__)) + "/repoupdater_vars.json",
 repos_json = os.path.dirname(os.path.abspath(__file__)) + "/repos.json"
 repos = read_json(repos_json)
 
+parser = argparse.ArgumentParser(description='Repo management and update script.')
+
+parser.add_argument('-repo',
+                    action='store',
+                    dest='repository',
+                    metavar='<RepositoryName>',
+                    required=False,
+                    help='Repository name in camel case')
+parser.add_argument('-id',
+                    action='store',
+                    dest='mod_id',
+                    metavar='<workshop_id>',
+                    required=False,
+                    help='Workshop ID')
+parser.add_argument('-title',
+                    action='store',
+                    dest='mod_title',
+                    metavar='"<workshop_title>"',
+                    required=False,
+                    help='Workshop Title')
+parser.add_argument('-path',
+                    action='store',
+                    dest='mod_path',
+                    metavar='"<mod_path>"',
+                    required=False,
+                    help='Path to mod')
+parser.add_argument('-list',
+                    action='store_true',
+                    dest='mod_list',
+                    required=False,
+                    help='List repos, its addons, and variables')
+parser.add_argument('-rebuild',
+                    action='store_true',
+                    dest='rebuild_repo',
+                    required=False,
+                    help='Forces rebuild of the specified repository')
+parser.add_argument('-add',
+                    action='store_true',
+                    dest='add',
+                    required=False,
+                    help='Adds ID')
+parser.add_argument('-remove',
+                    action='store_true',
+                    dest='remove',
+                    required=False,
+                    help='Removes ID')
+parser.add_argument('-noemail',
+                    action='store_true',
+                    dest='noemail',
+                    required=False,
+                    help='No email on update')
+parser.add_argument('-nodiscord',
+                    action='store_true',
+                    dest='nodiscord',
+                    required=False,
+                    help='No discord message on update')
+parser.add_argument('-debug',
+                    action='store_true',
+                    dest='debug',
+                    required=False,
+                    help='Show debug')
+
+args = parser.parse_args()
+
+repository = args.repository
+mod_id = args.mod_id
+mod_title = args.mod_title
+mod_path = args.mod_path
+mod_list = args.mod_list
+rebuild_repo = args.rebuild_repo
+add = args.add
+remove = args.remove
+noemail = args.noemail
+nodiscord = args.nodiscord
+debug = args.debug
+
+if repository and mod_list:
+    print(json.dumps(repos[repository], indent=4, separators=(',',': ')))
+    sys.exit(0)
+elif repository and add and mod_id and mod_path:
+    repos[repository][mod_id] = OrderedDict()
+    if mod_title:
+        repos[repository][mod_id]['title'] = mod_title
+    else:
+        repos[repository][mod_id]['title'] = ''
+    repos[repository][mod_id]['size'] = ''
+    repos[repository][mod_id]['created'] = ''
+    repos[repository][mod_id]['modified'] = ''
+    repos[repository][mod_id]['update'] = True
+    repos[repository][mod_id]['rsync'] = False
+    repos[repository][mod_id]['rebuild'] = False
+    repos[repository][mod_id]['enabled'] = True
+    repos[repository][mod_id]['path'] = mod_path
+    print(json.dumps(repos[repository][mod_id], indent=4, separators=(',',': ')))
+    if not os.path.exists(repos[repository][mod_id]['path']):
+        os.makedirs(repos[repository][mod_id]['path'])
+    write_json(repos, repos_json)
+    sys.exit(0)
+elif repository and remove and mod_id:
+    try:
+        if os.path.exists(repos[repository][mod_id]['path']):
+            shutil.rmtree(repos[repository][mod_id]['path'])
+        del repos[repository][mod_id]
+        write_json(repos, repos_json)
+        sys.exit(0)
+    except KeyError:
+        sys.exit(0)
+elif repository and rebuild_repo:
+    return_code = rebuild(a3sync_path, java_path, repository)
+    sys.exit(0)
+elif mod_list:
+    print(json.dumps(repos, indent=4, separators=(',',': ')))
+    sys.exit(0)
+
+#
+# No arguments specified, assume update for all repos
+#
 for repo in repos:
     # update each object with new information
     for id, val in sorted(repos[repo].items(), key=lambda x: x[1]['title']):
