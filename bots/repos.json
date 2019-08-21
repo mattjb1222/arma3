@@ -230,6 +230,74 @@
             "rebuild": false,
             "enabled": true,
             "path": "/mnt/Elements/repo/tempunitbaserepo/@tu_factions"
+        }
+    },
+    "TempUnitZombieRepo": {
+        "930264602": {
+            "title": "MrSanchez' Headlamps",
+            "size": "2.839 MB",
+            "created": "May 21, 2017 @ 9:36am",
+            "modified": "May 26, 2017 @ 1:36am",
+            "update": false,
+            "rsync": false,
+            "rebuild": false,
+            "enabled": true,
+            "path": "/mnt/Elements/repo/tempunitzombierepo/@mrsanchez"
+        },
+        "798485071": {
+            "title": "CBRN Defense Units",
+            "size": "0",
+            "created": "",
+            "modified": "",
+            "update": false,
+            "rsync": false,
+            "rebuild": false,
+            "enabled": true,
+            "path": "/mnt/Elements/repo/tempunitzombierepo/@cbrn"
+        },
+        "448333775": {
+            "title": "BG21 Slaughter Assets",
+            "size": "46.940 MB",
+            "created": "May 24, 2015 @ 5:43am",
+            "modified": "Jun 25, 2017 @ 4:21pm",
+            "update": false,
+            "rsync": false,
+            "rebuild": false,
+            "enabled": true,
+            "path": "/mnt/Elements/repo/tempunitzombierepo/@bg21"
+        },
+        "501966277": {
+            "title": "Zombies and Demons",
+            "size": "27.556 MB",
+            "created": "Aug 18, 2015 @ 3:29am",
+            "modified": "May 28, 2017 @ 10:12am",
+            "update": false,
+            "rsync": false,
+            "rebuild": false,
+            "enabled": true,
+            "path": "/mnt/Elements/repo/tempunitzombierepo/@zad"
+        },
+        "596795522": {
+            "title": "Horror Sounds &amp; Music Pack",
+            "size": "53.241 MB",
+            "created": "Jan 9, 2016 @ 7:09am",
+            "modified": "Apr 26, 2016 @ 2:50pm",
+            "update": false,
+            "rsync": false,
+            "rebuild": false,
+            "enabled": true,
+            "path": "/mnt/Elements/repo/tempunitzombierepo/@horrorsounds"
+        },
+        "951193783": {
+            "title": "Complementary Police Equipments",
+            "size": "0",
+            "created": "",
+            "modified": "",
+            "update": false,
+            "rsync": false,
+            "rebuild": false,
+            "enabled": true,
+            "path": "/mnt/Elements/repo/tempunitzombierepo/@cpe"
         },
         "1638341685": {
             "title": "DUI - Squad Radar",
@@ -240,7 +308,7 @@
             "rsync": false,
             "rebuild": false,
             "enabled": true,
-            "path": "/mnt/Elements/repo/tempunitbaserepo/@dui"
+            "path": "/mnt/Elements/repo/tempunitzombierepo/@dui"
         }
     }
 }
