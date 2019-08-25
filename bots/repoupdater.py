@@ -195,6 +195,10 @@ elif mod_list:
 # No arguments specified, assume update for all repos
 #
 for repo in repos:
+    # skip all other repositories if repo is defined
+    if repository and repo != repository:
+        continue
+
     # update each object with new information
     for id, val in sorted(repos[repo].items(), key=lambda x: x[1]['title']):
         # check if mod is enabled to be updated
