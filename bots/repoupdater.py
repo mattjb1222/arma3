@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import requests
-import datetime
 import argparse
 import os
 import re
@@ -9,7 +8,21 @@ import json
 import sys
 import subprocess
 import shutil
+import shlex
+import logging
+import time
+import fcntl
+from datetime import datetime
 from collections import OrderedDict
+
+def lock_pid(pid_file):
+  fp = open(pid_file, 'w')
+  try:
+    fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    print("locked {}".format(pid_file))
+    return True, fp
+  except IOError:
+    return False, fp
 
 def read_json(json_file):
     with open(json_file,'r') as f:
@@ -22,14 +35,22 @@ def write_json(json_data, json_file):
 def show_json(json_data):
     json.dumps(json_data, indent=4, separators=(',',': '))
 
+def run(cmd):
+    args = shlex.split(cmd)
+    child = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = child.communicate()
+    return out.decode(), err.decode(), child.returncode
+
 def rebuild(a3sync_path, java_path, repo):
     os.chdir(a3sync_path)
-    args = [java_path, '-jar', 'ArmA3Sync.jar', '-BUILD', repo]
-    child = subprocess.Popen(args, stdout=subprocess.PIPE)
-    stream = child.communicate()[0]
+    cmd = java_path + ' -jar ArmA3Sync.jar -BUILD ' + repo
+    out, err, rc = run(cmd)
+    logging.info("rebuild out: {}".format(str(out)))
+    if err:
+        logging.error("rebuild err: {}".format(str(err)))
     with open('/var/www/html/' + repo.lower() + '/.a3s/.htaccess','w') as f:
         f.write("Satisfy Any")
-    return child.returncode
+    return rc
 
 def create_steam_batch(steam_user, scripts_path, steam_apps_path, mod):
     with open(scripts_path + '/steam_script.' + str(os.getpid()), 'w') as f:
@@ -42,23 +63,37 @@ def create_steam_batch(steam_user, scripts_path, steam_apps_path, mod):
     return format("%s/steam_script.%s" % (scripts_path, os.getpid()))
 
 def download_mod(steam_cmd_bin, steam_batch):
-    args = [steam_cmd_bin, '+runscript', steam_batch]
-    child = subprocess.Popen(args, stdout=subprocess.PIPE)
-    stream = child.communicate()[0]
-    os.remove(steam_batch)
-    return child.returncode
+    cmd = steam_cmd_bin + ' +runscript ' + steam_batch
+    out, err, rc = run(cmd)
+    logging.info("download_mod out for {}: {}".format(str(steam_batch),str(out)))
+    if err:
+        logging.error("download_mod err for {}: {}".format(str(steam_batch),str(err)))
+    else:
+        os.remove(steam_batch)
+    return rc, out, err
 
 def rsync_files(steam_apps_path, id, path):
-    args = ['rsync', '--delete','-Pvvhra', steam_apps_path + "/steamapps/workshop/content/107410/" + id + "/", repos[repo][id]["path"]]
-    child = subprocess.Popen(args, stdout=subprocess.PIPE)
-    stream = child.communicate()[0]
-    return child.returncode
+    cmd = 'rsync --delete -Pvvhra ' + steam_apps_path + '/steamapps/workshop/content/107410/' + str(id) + '/ ' + repos[repo][id]['path']
+    out, err, rc = run(cmd)
+    logging.info("rsync out for {}: {}".format(str(id),str(out)))
+    if err:
+        logging.error("rsync err for {}: {}".format(str(id),str(err)))
+    return rc
 
 def delete_download_dir(steam_apps_path, id):
     if os.path.exists(steam_apps_path + "/steamapps/workshop/content/107410/" + id + "/"):
         shutil.rmtree(steam_apps_path + "/steamapps/workshop/content/107410/" + id + "/")
+        logging.info("deleted {}".format(steam_apps_path + "/steamapps/workshop/content/107410/" + id + "/"))
     else:
         return
+
+def discord_msg(bot_token, channel_id, msg):
+    base_url = "https://discordapp.com/api/channels/{}/messages".format(channel_id)
+    headers = { "Authorization":"Bot {}".format(bot_token),
+                "User-Agent":"myBotThing (http://some.url, v0.1)",
+                "Content-Type":"application/json", }
+    posted_json =  json.dumps ( {"content":msg} )
+    r = requests.post(base_url, headers = headers, data = posted_json)
 
 with open(os.path.dirname(os.path.abspath(__file__)) + "/repoupdater_vars.json",'r') as f:
     vars = json.load(f)
@@ -72,6 +107,18 @@ with open(os.path.dirname(os.path.abspath(__file__)) + "/repoupdater_vars.json",
     steam_user = vars['steam_user']
     emailmsg = vars['emailmsg']
     discordmsg = vars['discordmsg']
+    bot_token = vars['bot_token']
+    channel_id = vars['channel_id']
+
+# logging module configuration
+FORMAT = '%(asctime)-15s: %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT)
+
+# Determine if pid is locked, if locked, then exit, we don't want duplicate instances running
+locked, file_pid = lock_pid('/tmp/repoupdater.pid')
+if not locked:
+    print("Script already running... exiting.")
+    sys.exit(0)
 
 # load existing repo data
 repos_json = os.path.dirname(os.path.abspath(__file__)) + "/repos.json"
@@ -225,6 +272,7 @@ for repo in repos:
                     repos[repo][id]['update'] = True
             except:
                 repos[repo][id]['modified'] = m[1]
+        logging.info("ID: {} -- Title: {} -- Update: {}".format(id,repos[repo][id]['title'], repos[repo][id]['update']))
 
 write_json(repos, repos_json)
 
@@ -238,14 +286,15 @@ for repo in repos:
         if repos[repo][id]['update']: 
             steam_batch = create_steam_batch(steam_user, scripts_path, steam_apps_path, id)
 
-            attempt = 0
-            while attempt < 10:
-                return_code = download_mod(steam_cmd_bin, steam_batch)
-                if return_code == 0:
-                    repos[repo][id]['update'] = False
-                    repos[repo][id]['rsync'] = True
-                    break
-                attempt += 1
+            #attempt = 0
+            #while attempt < 10:
+            logging.info("Starting download for: {}".format(repos[repo][id]['title']))
+            return_code, download_out, download_err = download_mod(steam_cmd_bin, steam_batch)
+            if return_code == 0 and not re.search(r"[Tt]imeout downloading",download_out):
+                repos[repo][id]['update'] = False
+                repos[repo][id]['rsync'] = True
+                break
+            #attempt += 1
 
 write_json(repos, repos_json)
 
@@ -253,6 +302,7 @@ write_json(repos, repos_json)
 # Rsync files from workshop dir to the repo dir
 #
 for repo in repos:
+    updated_mods = {}
     for id in repos[repo]:
         if not repos[repo][id]['enabled']:
             continue
@@ -260,8 +310,19 @@ for repo in repos:
             return_code = rsync_files(steam_apps_path, id, repos[repo][id]['path'])
             if return_code == 0:
                 repos[repo][id]['rsync'] = False
+                updated_mods[id] = repos[repo][id]['title']
                 repos[repo][id]['rebuild'] = True
                 delete_download_dir(steam_apps_path, id)
+    #
+    # Report to Discord anything that was updated
+    #
+    if updated_mods:
+        msg = "<@&334491572748156928> Following were updated: ```\n"
+        for k,v in updated_mods.items():
+            msg = msg + k + ": " + v + " -- (" + repos[repo][k]['modified'] + " Pacific Time) \n"
+        msg = msg + '```'
+        if not nodiscord:
+            discord_msg(bot_token, channel_id, msg)
 
 write_json(repos, repos_json)
 
@@ -285,3 +346,6 @@ for repo in repos:
                     rebuilt[repo] = True
 
 write_json(repos, repos_json)
+
+if file_pid:
+    file_pid.close()
